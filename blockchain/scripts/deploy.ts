@@ -1,22 +1,26 @@
 import { ethers } from "hardhat";
+import hre from "hardhat";
+import "hardhat-deploy";
 
+// npx hardhat run scripts/deploy.ts --network chain
 async function main() {
-  const currentTimestampInSeconds = Math.round(Date.now() / 1000);
-  const ONE_YEAR_IN_SECS = 365 * 24 * 60 * 60;
-  const unlockTime = currentTimestampInSeconds + ONE_YEAR_IN_SECS;
+  const adminAddress = "0x2c84C3D16AaAC1157919D9210CBC7b8797F5A91a";
+  const notRevealedBaseUri = "https://chocolate-sophisticated-sawfish-216.mypinata.cloud/ipfs/QmZu2tqydunkVfRc4VL9hUnkKJk6Pjctvvr6F34jPergTv"
+  const ScrollNFT = await ethers.getContractFactory("ScrollNFT");
+  const scrollNFT = await ScrollNFT.deploy(adminAddress, notRevealedBaseUri);
 
-  const lockedAmount = ethers.utils.parseEther("1");
+  await scrollNFT.deployed();
+  console.log(`NFT deployed to ${scrollNFT.address}`);
 
-  const Lock = await ethers.getContractFactory("Lock");
-  const lock = await Lock.deploy(unlockTime, { value: lockedAmount });
+  await new Promise((resolve) => setTimeout(resolve, 10000));
 
-  await lock.deployed();
-
-  console.log(`Lock with 1 ETH and unlock timestamp ${unlockTime} deployed to ${lock.address}`);
+  await hre.run("verify:verify", {
+    address: scrollNFT.address,
+    constructorArguments: [adminAddress, notRevealedBaseUri],
+    contract: "contracts/ScrollNFT.sol:ScrollNFT",
+  });
 }
 
-// We recommend this pattern to be able to use async/await everywhere
-// and properly handle errors.
 main().catch((error) => {
   console.error(error);
   process.exitCode = 1;

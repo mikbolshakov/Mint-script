@@ -1,14 +1,14 @@
 import { ethers } from "hardhat";
 import { expect } from "chai";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { MyToken } from "../typechain-types";
+import { ScrollNFT } from "../typechain-types";
 
 describe("NFT tests", () => {
   let signers: SignerWithAddress[];
   let developer: SignerWithAddress;
   let user1: SignerWithAddress;
   let user2: SignerWithAddress;
-  let nftContract: MyToken;
+  let nftContract: ScrollNFT;
   before(async () => {
     signers = await ethers.getSigners();
     developer = signers[0];
@@ -16,18 +16,32 @@ describe("NFT tests", () => {
     user2 = signers[2];
   });
   it("Deploys NFT contract", async () => {
-    const Factory = await ethers.getContractFactory("MyToken");
-    const myNFTToken = await Factory.deploy(developer.address);
+    const Factory = await ethers.getContractFactory("ScrollNFT");
+    const myNFTToken = await Factory.deploy(developer.address, "not rev base uri");
     expect(myNFTToken.address).to.not.eq(ethers.constants.AddressZero);
-    nftContract = myNFTToken as MyToken;
+    nftContract = myNFTToken as ScrollNFT;
   });
 
   it("Mint some nfts", async () => {
+    expect(await nftContract.balanceOf(user1.address)).to.eq(0)
+    expect(await nftContract.getBaseUri()).to.eq("")
+    expect(await nftContract.getNotRevealedBaseUri()).to.eq("not rev base uri")
+
     const mintTx = await nftContract.connect(user1).safeMint();
     await mintTx.wait();
-    const mintTx2 = await nftContract.connect(user2).safeMint();
-    await mintTx2.wait();
+
+    expect(await nftContract.balanceOf(user1.address)).to.eq(1)
+    expect(await nftContract.ownerOf(0)).to.eq(user1.address)
+    expect(await nftContract.tokenURI(0)).to.eq("not rev base uri")
   });
+
+  it("Reveal", async () => {
+    await nftContract.setBaseURI("ipfs/")
+    expect(await nftContract.getBaseUri()).to.eq("ipfs/")
+    await nftContract.reveal();
+    expect(await nftContract.tokenURI(0)).to.eq("ipfs/0.json")
+  });
+
 
   it("Check all possible requires", async () => {
     expect(nftContract.withdraw()).to.be.revertedWith("Zero balance");

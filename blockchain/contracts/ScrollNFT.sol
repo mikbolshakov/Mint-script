@@ -6,23 +6,33 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Pausable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
-contract MyToken is ERC721, ERC721Pausable, Ownable {
+contract ScrollNFT is ERC721, ERC721Pausable, Ownable {
     using Strings for uint256;
 
     uint256 private _nextTokenId;
 
-    string public baseURI;
-    string public notRevealedUri;
+    string private baseURI;
     string private baseExtension = ".json";
-    bool public revealed = false;
-
+    string private notRevealedBaseUri;
+    bool private revealed = false;
 
     constructor(
-        address initialOwner
-    ) ERC721("MyToken", "MTK") Ownable(initialOwner) {}
+        address initialOwner, string memory _notRevealedBaseUri
+    ) ERC721("ScrollNFT", "SNFT") Ownable(initialOwner) {
+        notRevealedBaseUri = _notRevealedBaseUri;
+    }
 
     function _baseURI() internal view override returns (string memory) {
         return baseURI;
+    }
+
+    /* GETTERS */
+    function getBaseUri() external view returns(string memory) {
+        return baseURI;
+    }
+
+    function getNotRevealedBaseUri() external view returns(string memory) {
+        return notRevealedBaseUri;
     }
 
     function tokenURI(
@@ -34,7 +44,7 @@ contract MyToken is ERC721, ERC721Pausable, Ownable {
         );
 
         if (revealed == false) {
-            return notRevealedUri;
+            return notRevealedBaseUri;
         }
 
         string memory currentBaseURI = _baseURI();
@@ -50,34 +60,30 @@ contract MyToken is ERC721, ERC721Pausable, Ownable {
                 : "";
     }
 
+    /* MINT */
     function safeMint() external {
         uint256 tokenId = _nextTokenId++;
         _safeMint(msg.sender, tokenId);
     }
 
-    /* Only Owner */
-
-    function setBaseURI(string memory _newBaseURI) public onlyOwner {
+    /* ONLY OWNER */
+    function setBaseURI(string memory _newBaseURI) external onlyOwner {
         baseURI = _newBaseURI;
     }
 
-    function setNotRevealedURI(string memory _notRevealedURI) public onlyOwner {
-        notRevealedUri = _notRevealedURI;
-    }
-
-    function reveal() public onlyOwner {
+    function reveal() external onlyOwner {
         revealed = true;
     }
 
-    function pause() public onlyOwner {
+    function pause() external onlyOwner {
         _pause();
     }
 
-    function unpause() public onlyOwner {
+    function unpause() external onlyOwner {
         _unpause();
     }
 
-    function withdraw() public onlyOwner {
+    function withdraw() external onlyOwner {
         uint256 balance = address(this).balance;
         require(balance > 0, "Zero balance");
 
