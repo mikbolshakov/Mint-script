@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Pausable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
-contract ScrollNFT is ERC721, ERC721Pausable, Ownable {
+contract NYScroll is ERC721, ERC721Pausable, Ownable {
     using Strings for uint256;
 
     uint256 private _nextTokenId;
@@ -18,7 +18,7 @@ contract ScrollNFT is ERC721, ERC721Pausable, Ownable {
 
     constructor(
         address initialOwner, string memory _notRevealedBaseUri
-    ) ERC721("ScrollNFT", "SNFT") Ownable(initialOwner) {
+    ) ERC721("NYScroll", "NYS") Ownable(initialOwner) {
         notRevealedBaseUri = _notRevealedBaseUri;
     }
 

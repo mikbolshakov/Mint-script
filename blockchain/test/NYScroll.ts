@@ -1,14 +1,14 @@
 import { ethers } from "hardhat";
 import { expect } from "chai";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { ScrollNFT } from "../typechain-types";
+import { NYScroll } from "../typechain-types";
 
 describe("NFT tests", () => {
   let signers: SignerWithAddress[];
   let developer: SignerWithAddress;
   let user1: SignerWithAddress;
   let user2: SignerWithAddress;
-  let nftContract: ScrollNFT;
+  let nftContract: NYScroll;
   before(async () => {
     signers = await ethers.getSigners();
     developer = signers[0];
@@ -16,10 +16,10 @@ describe("NFT tests", () => {
     user2 = signers[2];
   });
   it("Deploys NFT contract", async () => {
-    const Factory = await ethers.getContractFactory("ScrollNFT");
+    const Factory = await ethers.getContractFactory("NYScroll");
     const myNFTToken = await Factory.deploy(developer.address, "not rev base uri");
     expect(myNFTToken.address).to.not.eq(ethers.constants.AddressZero);
-    nftContract = myNFTToken as ScrollNFT;
+    nftContract = myNFTToken as NYScroll;
   });
 
   it("Mint some nfts", async () => {
