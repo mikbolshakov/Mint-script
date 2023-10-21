@@ -6,11 +6,11 @@ dotenv.config();
 const config: HardhatUserConfig = {
   solidity: "0.8.20",
   networks: {
-    scrollSepolia: {
+    chain: {
       url: "https://sepolia-rpc.scroll.io" || "",
       accounts:
-        process.env.PRIVATE_KEY !== undefined
-          ? [<string>process.env.PRIVATE_KEY]
+        process.env.ADMIN_PRIVATE_KEY !== undefined
+          ? [<string>process.env.ADMIN_PRIVATE_KEY]
           : [],
     },
   },
