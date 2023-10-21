@@ -1,12 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Pausable.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
-contract NYScroll is ERC721, ERC721Pausable, Ownable {
+contract NYScroll is ERC721 {
     using Strings for uint256;
 
     uint256 private _nextTokenId;
@@ -15,11 +13,19 @@ contract NYScroll is ERC721, ERC721Pausable, Ownable {
     string private baseExtension = ".json";
     string private notRevealedBaseUri;
     bool private revealed = false;
+    address private owner;
 
     constructor(
-        address initialOwner, string memory _notRevealedBaseUri
-    ) ERC721("NYScroll", "NYS") Ownable(initialOwner) {
+        address _owner,
+        string memory _notRevealedBaseUri
+    ) ERC721("NYScroll", "NYS") {
+        owner = _owner;
         notRevealedBaseUri = _notRevealedBaseUri;
+    }
+
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Not an owner");
+        _;
     }
 
     function _baseURI() internal view override returns (string memory) {
@@ -27,11 +33,11 @@ contract NYScroll is ERC721, ERC721Pausable, Ownable {
     }
 
     /* GETTERS */
-    function getBaseUri() external view returns(string memory) {
+    function getBaseUri() external view returns (string memory) {
         return baseURI;
     }
 
-    function getNotRevealedBaseUri() external view returns(string memory) {
+    function getNotRevealedBaseUri() external view returns (string memory) {
         return notRevealedBaseUri;
     }
 
@@ -75,29 +81,20 @@ contract NYScroll is ERC721, ERC721Pausable, Ownable {
         revealed = true;
     }
 
-    function pause() external onlyOwner {
-        _pause();
-    }
-
-    function unpause() external onlyOwner {
-        _unpause();
-    }
-
-    function withdraw() external onlyOwner {
-        uint256 balance = address(this).balance;
-        require(balance > 0, "Zero balance");
-
-        (bool success, ) = address(owner()).call{value: balance}("");
-        require(success, "Transfer failed.");
-    }
-
     // The following functions are overrides required by Solidity.
 
-    function _update(
+    function _beforeTokenTransfer(
+        address from,
         address to,
         uint256 tokenId,
-        address auth
-    ) internal override(ERC721, ERC721Pausable) returns (address) {
-        return super._update(to, tokenId, auth);
+        uint256 batchSize
+    ) internal override {
+        super._beforeTokenTransfer(from, to, tokenId, batchSize);
+    }
+
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view override(ERC721) returns (bool) {
+        return super.supportsInterface(interfaceId);
     }
 }

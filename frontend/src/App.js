@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { ethers } from "ethers";
 import contractAbi from "./contractAbi.json";
 
-const contractAddress = "0x7cdA2CF9C5B593b22eCedd9392136daEFe4F9727"
+const contractAddress = "0x501eb33bBFe6564Fc2d69D69Da234e4BC88949ba";
 const provider = new ethers.providers.Web3Provider(window.ethereum);
 const signer = provider.getSigner();
 const contract = new ethers.Contract(contractAddress, contractAbi, signer);
